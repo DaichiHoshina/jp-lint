@@ -12,7 +12,7 @@
 
 ## 使い方
 
-`skills/jp-lint/` を Claude Code のスキルの置き場所へ入れ、「この文書を推敲して」と頼む。script だけ使うときは次のとおり。
+`skills/jp-lint/` を Claude Code のスキルの置き場所へ入れ、「この文書を点検して」と頼む。script だけ使うときは次のとおり。
 
 ```bash
 bash skills/jp-lint/scripts/jp-quality-lint.sh --strict 対象の file
