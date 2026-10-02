@@ -1,0 +1,7 @@
+{
+  "name": "jp-lint",
+  "version": "0.1.0",
+  "description": "書き終えた日本語の文書を、NG 語辞書と文の組み立ての検査で点検して直す",
+  "author": { "name": "Daichi Hoshina" },
+  "license": "MIT"
+}
