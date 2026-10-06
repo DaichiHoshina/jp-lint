@@ -14,7 +14,7 @@ mkdir -p "$DEST/scripts" "$DEST/lib/jp-quality" "$DEST/references"
 
 cp "$SRC/scripts/jp-quality-lint.sh" "$DEST/scripts/"
 cp "$SRC/lib/jp-quality/structural-checks.sh" "$SRC/lib/jp-quality/term-extraction.sh" "$DEST/lib/jp-quality/"
-for f in thresholds portable-stat log-rotation strip-code; do cp "$SRC/lib/$f.sh" "$DEST/lib/"; done
+for f in thresholds portable-stat log-rotation strip-code ja-byte-class; do cp "$SRC/lib/$f.sh" "$DEST/lib/"; done
 
 # 辞書は個人 path を含む行と、同梱しない PRINCIPLES.md への link を除いて写す
 sed -e '/~\/\.claude\//d' -e '/\[PRINCIPLES\.md\](PRINCIPLES\.md)/d' \

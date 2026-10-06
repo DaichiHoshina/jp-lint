@@ -16,7 +16,7 @@ source "${BASH_SOURCE[0]%/*}/thresholds.sh"
 source "${BASH_SOURCE[0]%/*}/portable-stat.sh"
 
 # usage: _rotate_log_if_needed <log_file> [keep_bak_count]
-# keep_bak_count: 保持する .bak 世代数 (未指定 or 0 = 世代削除しない)
+# keep_bak_count: 維持する .bak 世代数 (未指定 or 0 = 世代削除しない)
 #                 1 以上を渡すと ls -1t で新しい順に並べ、keep_bak_count 個より
 #                 古い .bak を rm する
 _rotate_log_if_needed() {
