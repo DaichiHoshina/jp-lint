@@ -11,28 +11,16 @@ _JP_QUALITY_STRUCTURAL_CHECKS_LOADED=1
 # shellcheck source=term-extraction.sh
 source "${BASH_SOURCE[0]%/*}/term-extraction.sh"
 
-# 構造的可読性の script 検出 (連続漢字≥5 / 読点≥4)。warn-only、block しない。
-# PRINCIPLES.md `## 文単位の品質規約` (連続漢字 4 文字上限 / 読点 3 個まで) を script 検出に接続。
-# 固有名詞・技術用語で誤検知しうるため warn 止まり。出力: warn 文字列 (検出ゼロなら空)。
-# 表示は count + 漢字 sample のみ (UTF-8 truncation による mojibake を避ける)
+# 読点≥4 の script 検出。warn-only、block しない。出力: warn 文字列 (検出ゼロなら空)。
+# 連続漢字は 2026-10-03 から閾値 6 の block になったので、この関数では扱わない。
+# count は _check_sentence_structure_counts (include_readability=1) が返し、severity は呼び出し側が決める
+# (chat は _cq_struct_block、外向き text は _struct_block、CLI は [block] 行)。
 _check_structural_quality() {
   local text="$1"
   [[ -z "$text" ]] && return 0
   local clean
   clean=$(_strip_code_blocks "$text")
   local out=""
-  # 連続漢字 5 文字以上。grep '[一-龯]' は C locale で byte 範囲マッチになるため python3 で Unicode 正確判定。
-  # python3 不在なら graceful skip (読点 check は継続)。outward text 時のみ呼ばれるため fork 1 本は許容
-  if command -v python3 &>/dev/null; then
-    local kanji kc ksample
-    kanji=$(printf '%s' "$clean" | python3 -c 'import sys,re
-h=sorted(set(re.findall(r"[一-龯]{5,}", sys.stdin.read())))
-print(f"{len(h)}\t"+" ".join(h[:3]))' 2>/dev/null || printf '0\t')
-    IFS=$'\t' read -r kc ksample <<< "$kanji"
-    if [[ "${kc:-0}" =~ ^[0-9]+$ ]] && (( kc > 0 )); then
-      out="連続漢字≥5: ${kc}種 (${ksample}) → 助詞挿入/訓読み開く; "
-    fi
-  fi
   # 読点 4 個以上の文 (。で改行分割してから行=文として数える。byte-safe)
   # macOS awk はマルチバイト RS 非対応のため sed で改行化してから処理する
   # 。を改行へ置換 (BSD/GNU sed 両対応の $'\n' 形式)。SC1003 は誤検出のため抑止
@@ -48,8 +36,8 @@ print(f"{len(h)}\t"+" ".join(h[:3]))' 2>/dev/null || printf '0\t')
 # chat 経路 (_chat_quality_check) が矢印チェーンを block 判定に使うため、
 # warn 文字列でなく数値で返す。warn 文字列が要る経路は wrapper の _check_sentence_structure を使う。
 # 引数: text, polite_check (2 で「〜だ / 〜である」終止を検査 (chat 用)。3 で敬体でない文末を検査 (人に宛てる draft 用、2026-10-02)。外向き doc は default 0),
-#       include_readability (1 で連続漢字≥5 / 読点≥4 も同じ python 1 fork で検査。
-#       chat 経路用: _check_structural_quality との 2 重 fork を避ける。外向き経路は既存関数のまま)
+#       include_readability (1 で連続漢字≥6 / 読点≥4 も同じ python 1 fork で検査。
+#       連続漢字は block 判定に使うため、この count を使う経路はすべて 1 を渡す)
 # python3 不在なら全 count 0 で graceful skip
 _check_sentence_structure_counts() {
   local text="$1"
@@ -105,7 +93,7 @@ kanji_cnt = 0
 kanji_sample = "-"
 touten = 0
 if os.environ.get("INCLUDE_READABILITY") == "1":
-    runs = sorted(set(re.findall(r"[一-龯]{5,}", text)))
+    runs = sorted(set(re.findall(r"[一-龯]{6,}", text)))
     kanji_cnt = len(runs)
     kanji_sample = " ".join(runs[:3]) or "-"
     touten = sum(1 for s in sents if s.count("、") >= 4)
@@ -269,8 +257,7 @@ print(f"{kuten}\t{arrow}\t{polite}\t{kanji_cnt}\t{kanji_sample}\t{touten}\t{flat
 # 引数: なし。出力: warn 文字列 (検出ゼロなら空)
 _format_sentence_structure_warn() {
   local out=""
-  (( _SS_KANJI_CNT > 0 )) && out="連続漢字≥5: ${_SS_KANJI_CNT}種 (${_SS_KANJI_SAMPLE}) → 助詞挿入/訓読み開く; "
-  (( _SS_TOUTEN > 0 )) && out="${out}読点≥4の文: ${_SS_TOUTEN}個 → 文分割; "
+  (( _SS_TOUTEN > 0 )) && out="読点≥4の文: ${_SS_TOUTEN}個 → 文分割; "
   (( _SS_ARROW > 0 )) && out="${out}矢印チェーン: ${_SS_ARROW}行 → 文章に展開; "
   if (( _SS_POLITE > 0 )); then
     if [[ "${_SS_POLITE_MODE:-0}" == "2" ]]; then

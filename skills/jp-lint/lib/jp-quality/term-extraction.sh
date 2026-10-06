@@ -10,6 +10,8 @@ _JP_QUALITY_TERM_EXTRACTION_LOADED=1
 
 # shellcheck source=../thresholds.sh
 source "${BASH_SOURCE[0]%/*}/../thresholds.sh"
+# shellcheck source=../ja-byte-class.sh
+source "${BASH_SOURCE[0]%/*}/../ja-byte-class.sh"
 # shellcheck source=../portable-stat.sh
 source "${BASH_SOURCE[0]%/*}/../portable-stat.sh"
 # shellcheck source=../log-rotation.sh
@@ -153,7 +155,7 @@ _assert_required_keys() {
   local _dict_mtime
   _dict_mtime=$(portable_stat_mtime "$_principles_file")
   local _flag_path="/tmp/claude-ngdict-keys-ok-${SESSION_ID:-$$}-${_dict_mtime}"
-  # 古いキャッシュ (同セッション・異なる mtime) のみ削除 — _flag_path 自体は保持する
+  # 古いキャッシュ (同セッション・異なる mtime) のみ削除 — _flag_path 自体は維持する
   for _old_flag in "/tmp/claude-ngdict-keys-ok-${SESSION_ID:-$$}"-*; do
     [[ -e "$_old_flag" ]] || continue
     [[ "$_old_flag" = "$_flag_path" ]] && continue
@@ -236,7 +238,8 @@ _check_term_list() {
   # 全語を1回の grep -ioFf で hit 語を列挙 (N×fork → 1 fork)
   # -i: 英語 NG 語 (leverage / Leverage / LEVERAGE 等) の大文字小文字差があっても検出する。JP 語は無影響
   local found
-  found=$(printf '%s' "$clean_text" | grep -ioFf <(printf '%s\n' "${words[@]}") | sort -u || true)
+  # sort は C locale に固定する。macOS の UTF-8 照合ではスマートとクリーンが同順位になり、sort -u が 1 語に潰す
+  found=$(printf '%s' "$clean_text" | grep -ioFf <(printf '%s\n' "${words[@]}") | LC_ALL=C sort -u || true)
   [[ -z "$found" ]] && return 0
   if [[ "$key" == "AI段取り定型 (block)" ]]; then
     _filter_dandori_by_position found "$clean_text"
@@ -255,15 +258,32 @@ _check_term_list() {
 _filter_katakana_by_boundary() {
   local -n _kb_found="$1"
   local _text="$2" _kept="" _hit
+  # カタカナの判定は byte の並びで行う (理由は ja-byte-class.sh)。関数内だけ C locale にして byte 単位で扱う
+  local -x LC_ALL=C
   while IFS= read -r _hit; do
     [[ -z "$_hit" ]] && continue
-    if [[ "$_hit" =~ ^[ァ-ヺー]+$ ]] && \
-       ! printf '%s' "$_text" | LC_ALL=en_US.UTF-8 grep -qE "(^|[^ァ-ヺー])${_hit}([^ァ-ヺー]|$)"; then
+    if [[ "$_hit" =~ ^(${_JA_KATA})+$ ]] && ! _katakana_hit_is_bounded "$_text" "$_hit"; then
       continue
     fi
     _kept+="${_hit}"$'\n'
   done <<< "$_kb_found"
   _kb_found="${_kept%$'\n'}"
+}
+
+# text の中に、直前と直後の文字がどちらもカタカナでない hit が 1 か所でもあれば 0 を返す。
+# カタカナ 1 文字は 3 byte なので、hit の前の 3 byte と後の 3 byte を見る (呼び出し側が C locale にしている)
+_katakana_hit_is_bounded() {
+  local rest="$1" hit="$2" before after
+  while [[ "$rest" == *"$hit"* ]]; do
+    before="${rest%%"$hit"*}"
+    rest="${rest#*"$hit"}"
+    after="${rest:0:3}"
+    (( ${#before} >= 3 )) && before="${before:${#before}-3}"
+    if ! [[ "$before" =~ ^${_JA_KATA}$ ]] && ! [[ "$after" =~ ^${_JA_KATA}$ ]]; then
+      return 0
+    fi
+  done
+  return 1
 }
 
 # AI 段取り短語 (まず/次に/…) は「気まずい」等に部分一致するため段落 lead 位置のみ block

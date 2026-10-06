@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # jp-quality hook (pre-tool-use / stop) と同じ辞書・判定関数で既存文書を後追い検査する CLI。
 # 判定 logic は lib/jp-quality/ を source して共有する (複製すると hook と判定がずれる)。
-# 構造検査は hook と同じ全観点 (連続漢字 / 読点 / 矢印 / 平坦 bullet / 時限 / 括弧詰め)。
+# 構造検査は hook と同じ全観点 (連続漢字 / 読点 / 矢印 / 平坦 bullet / 時限 / 括弧詰め)。連続漢字≥6 だけ block。
 # usage: jp-quality-lint.sh [--strict] <file...>   (file 省略時は stdin を検査)
 #        --strict は辞書の skill-only key (荒い比喩語) も検査対象に足す。flag なしの mode は
 #        hook と同じ key 集合のままにして、hook と CLI の判定がずれないようにする。
@@ -13,6 +13,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=../lib/jp-quality/structural-checks.sh
 source "${SCRIPT_DIR}/../lib/jp-quality/structural-checks.sh"
+# shellcheck source=../lib/ja-byte-class.sh
+source "${SCRIPT_DIR}/../lib/ja-byte-class.sh"
 
 [[ -n "${JP_QUALITY_DICT:-}" ]] && _principles_file="${JP_QUALITY_DICT}"
 
@@ -45,8 +47,10 @@ _check_forced_shortening() {
   local hits stripped
   # 「〜済」で文を切る形。「済み」「済ませる」等は送り仮名ごと潰してから探すので検出されない
   # 送り仮名付きの活用形と、済を含む正規の熟語を先に潰してから探す
-  stripped=$(printf '%s' "$text" | sed -E 's/済[みまむめせ]/@@/g; s/(経済|救済|決済|返済|完済|弁済|共済|済生)/@@/g')
-  hits=$(printf '%s' "$stripped" | grep -oE '[一-龥ァ-ヶー]+済' | sort -u | tr '\n' ' ' || true)
+  # 文字の種類は byte の並びで照合し、C locale で実行する (理由は lib/ja-byte-class.sh)。
+  # 送り仮名も [みまむめせ] の文字集合にすると C locale で 1 byte ずつ照合されるので、選択肢で書く
+  stripped=$(printf '%s' "$text" | LC_ALL=C sed -E 's/済(み|ま|む|め|せ)/@@/g; s/(経済|救済|決済|返済|完済|弁済|共済|済生)/@@/g')
+  hits=$(printf '%s' "$stripped" | LC_ALL=C grep -oE "(${_JA_KANJI}|${_JA_KATA})+済" | sort -u | tr '\n' ' ' || true)
   [[ -n "${hits// /}" ]] && out="${out}済で切る省略形: ${hits}; "
   # 「要確認」「要対応」のように 要+漢語 で状態を表す形
   # 文書形式として固定した label (【要確認】 / 前提要確認 / [[warn:要対応]]) は省略形として数えない
@@ -54,7 +58,7 @@ _check_forced_shortening() {
   [[ -n "${hits// /}" ]] && out="${out}要+漢語の省略形: ${hits}; "
   # 連用形否定 (未渡し / 未指定時)
   # 「し」側は「未満しか」等を拾うため、文書化済の例 (未渡し) だけを明示で見る
-  hits=$(printf '%s' "$text" | grep -oE '(未[一-龥]{1,3}時|未渡し)' | sort -u | tr '\n' ' ' || true)
+  hits=$(printf '%s' "$text" | LC_ALL=C grep -oE "(未(${_JA_KANJI}){1,3}時|未渡し)" | sort -u | tr '\n' ' ' || true)
   [[ -n "${hits// /}" ]] && out="${out}連用形否定: ${hits}; "
   printf '%s' "${out% }"
 }
@@ -106,6 +110,12 @@ _lint_text() {
   fi
   # 構造検査は hook (_block_if_ai_jargon) と同じ全観点を見る (100字超文は 2026-08-28 に廃止)
   _check_sentence_structure_counts "$text" 0 1
+  # 連続漢字≥6 は hook と同じく block 扱いにする (user 指摘 2026-10-03)
+  if (( _SS_KANJI_CNT > 0 )); then
+    printf '[block] 構造: 連続漢字≥6: %s種 (%s) → 助詞挿入か訓読み開きで分ける\n' "$_SS_KANJI_CNT" "$_SS_KANJI_SAMPLE"
+    found=1
+    EXIT_CODE=1
+  fi
   local structural
   structural=$(_format_sentence_structure_warn)
   if [[ -n "$structural" ]]; then
