@@ -167,9 +167,9 @@ for s in sents:
 da_cnt = len(da_hits)
 da_sample = " / ".join(da_hits[:2]) or "-"
 
-# 同一文末の 3 連続 (user 指示 2026-09-12)。語尾の文字列だけを差し替える書き直しを
-# 招かないよう、対象を地の文と 1 bullet 内の連続に限る。並列した事実を同じ文末で
-# 書き並べた bullet 列は行ごとに run を切るため検出しない
+# 同一文末の 3 連続 (user 指示 2026-09-12 / 2026-10-07)。読み手に見える並びで同じ文末が
+# 3 文続けば検出する。bullet の階層・見出し・空行では run を切らず、表・引用・code fence
+# だけで切る
 ENDINGS = ["ませんでした", "ましょう", "ました", "ません", "でした", "でしょう",
            "ます", "です", "である", "だった", "した", "する", "ある", "いる",
            "なる", "ない"]
@@ -182,19 +182,17 @@ def _ending_key(sent):
 keys = []
 for ln in lines:
     stripped = ln.strip()
-    if not stripped or stripped.startswith(("#", "|", ">", "```")):
+    if not stripped or stripped.startswith("#"):
+        continue
+    if stripped.startswith(("|", ">", "```")):
         keys.append(None)
         continue
     m = bullet.match(ln)
     body = m.group(3) if m else stripped
-    if m:
-        keys.append(None)
     for part in body.split("。"):
         part = part.strip()
         if part:
             keys.append(_ending_key(part))
-    if m:
-        keys.append(None)
 end_runs = []
 run_key = None
 run_len = 0
