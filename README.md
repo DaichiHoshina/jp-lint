@@ -6,7 +6,7 @@
 
 | path | 役割 |
 |---|---|
-| `skills/jp-lint/SKILL.md` | 検査から書き換えまでの手順 |
+| `skills/jp-lint/SKILL.md` | 検査から書き換えまでの手順と、失敗したときの対処 |
 | `skills/jp-lint/scripts/jp-quality-lint.sh` | 辞書と構造の検査 (bash) |
 | `skills/jp-lint/references/NG-DICTIONARY.md` | NG 語辞書 |
 
@@ -22,7 +22,14 @@ bash 4 以上が必要 (連想配列を使う)。
 
 ## 更新
 
-辞書と script の正本は別の repo にあり、この repo は写しになる。直接編集せず、`scripts/export-from-ai-tools.sh` でもう一度取り込む。
+正本は別の repo にある。file の種類で更新の方法が違う。
+
+| file | 更新の方法 |
+|---|---|
+| 辞書と script (`references/` `scripts/` `lib/`) | 直接編集せず、`scripts/export-from-ai-tools.sh` でもう一度取り込む |
+| `SKILL.md` | 正本の変更のうち、この repo だけで使えるものを手で書き換えて反映する |
+
+どちらも、反映した正本の commit を commit 本文の `ai-tools-sync:` の行に記録する。
 
 ## ライセンス
 
