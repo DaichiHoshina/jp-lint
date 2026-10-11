@@ -35,7 +35,7 @@ _append_jp_quality_log() {
   local tool_name="$1"
   local hit_term="$2"
   local action="$3"
-  # bats unit test 実行中はログ汚染を防ぐため skip
+  # bats unit test 実行中はログへの混入を防ぐため skip
   [[ -n "${BATS_TEST_FILENAME:-}" ]] && return 0
   local log_dir="$HOME/.claude/logs"
   local log_file="${log_dir}/jp-quality-block.log"
