@@ -42,5 +42,12 @@ setup() {
     "$BATS_TEST_DIRNAME/../scripts/export-from-ai-tools.sh")
   DEST="$BATS_TEST_TMPDIR/dest"; mkdir -p "$DEST/scripts"; cp "$orig" "$DEST/scripts/"
   DEST="$DEST" bash -c "set -e; DEST=\"$DEST\"; $snippet"
-  diff "$DEST/scripts/jp-quality-lint.sh" "$BATS_TEST_DIRNAME/../skills/jp-lint/scripts/jp-quality-lint.sh"
+  grep -q '^source .*user-overlay.sh"; _apply_user_overlay$' "$DEST/scripts/jp-quality-lint.sh"
+}
+
+@test "くだけた話し言葉の分類は同梱しない" {
+  run grep -c 'くだけた話し言葉' "$BATS_TEST_DIRNAME/../skills/jp-lint/references/NG-DICTIONARY.md" "$BATS_TEST_DIRNAME/../skills/jp-lint/scripts/jp-quality-lint.sh"
+  [[ "$output" != *":1"* ]]
+  run bash -c "printf 'やっぱ大事だよ。\n' | '$BATS_TEST_DIRNAME/../skills/jp-lint/scripts/jp-quality-lint.sh'"
+  [ "$status" -eq 0 ]
 }

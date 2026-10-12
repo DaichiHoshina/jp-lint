@@ -33,6 +33,14 @@ source "${SCRIPT_DIR}/../lib/jp-quality/user-overlay.sh"; _apply_user_overlay
 ' "$DEST/scripts/jp-quality-lint.sh"
 rm -f "$DEST/scripts/jp-quality-lint.sh.bak"
 grep -q '_apply_user_overlay' "$DEST/scripts/jp-quality-lint.sh" || { echo "差分辞書の処理を差し込めませんでした" >&2; exit 2; }
+
+# 公開 repo では「くだけた話し言葉」の分類を同梱しない (正本の個人向けの分類のため)
+# 分類の行と、その下の説明の引用を次の分類か見出しの手前まで除く
+awk '/^\*\*くだけた話し言葉/ { skip = 1; next } skip && (/^\*\*/ || /^#/) { skip = 0 } !skip' \
+    "$DEST/references/NG-DICTIONARY.md" > "$DEST/references/NG-DICTIONARY.md.tmp"
+mv "$DEST/references/NG-DICTIONARY.md.tmp" "$DEST/references/NG-DICTIONARY.md"
+sed -i.bak 's/ "くだけた話し言葉 (block)"//' "$DEST/scripts/jp-quality-lint.sh"
+rm -f "$DEST/scripts/jp-quality-lint.sh.bak"
 chmod +x "$DEST/scripts/jp-quality-lint.sh"
 
 # 写した結果が単独で動くことと、公開できる内容であることを確かめる

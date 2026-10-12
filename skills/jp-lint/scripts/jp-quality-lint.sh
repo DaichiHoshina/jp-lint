@@ -30,7 +30,7 @@ _BLOCK_KEYS=(
   "AI定型語" "カタカナ造語禁止" "難読漢語 (block)" "非日常英語 (block)"
   "弱い表現 (block)" "冗長表現 (block)" "AI段取り定型 (block)"
   "ヘッジ濫用 (block)" "過剰丁寧 (block)" "比喩・擬人化 (block)"
-  "曖昧な汎用動詞 (block)" "くだけた話し言葉 (block)"
+  "曖昧な汎用動詞 (block)"
   "非公式専門用語 (block)"
 )
 _WARN_KEYS=("断定語 (warn-only)" "英語jargon (warn-only)")
