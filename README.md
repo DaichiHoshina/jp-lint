@@ -1,6 +1,6 @@
 # jp-lint
 
-書き終えた日本語の文書を、NG 語辞書と文の組み立ての検査で点検して書き換える Claude Code のスキル。
+書き終えた日本語の文書を、NG 語辞書と文の組み立ての検査で点検して書き換える AI エージェント向けのスキル。Agent Skills の形式 (`SKILL.md` を置いた dir) に対応するエージェントで使える。
 
 ## 構成
 
@@ -10,10 +10,39 @@
 | `skills/jp-lint/scripts/jp-quality-lint.sh` | 辞書と構造の検査 (bash) |
 | `skills/jp-lint/references/NG-DICTIONARY.md` | NG 語辞書 |
 | `skills/jp-lint/lib/jp-quality/user-overlay.sh` | 利用者の差分辞書を重ねる処理 (この repo だけの仕様) |
+| `scripts/install.sh` | 各エージェントのスキルの置き場所へ symlink で配置する |
 
 ## 使い方
 
-`skills/jp-lint/` を Claude Code のスキルの置き場所へ入れ、「この文書を点検して」と頼む。script だけ使うときは次のとおり。
+repo を clone して `scripts/install.sh` を実行し、エージェントに「この文書を点検して」と頼む。
+
+```bash
+git clone https://github.com/DaichiHoshina/jp-lint.git
+cd jp-lint
+scripts/install.sh                 # $HOME/.agents/skills と $HOME/.claude/skills へ配置する
+scripts/install.sh cursor codex    # エージェントを指定して配置する
+```
+
+symlink で配置するので、repo を `git pull` すれば各エージェントの jp-lint も更新される。
+
+| 指定する名前 | 配置先 | 主な読み手 |
+|---|---|---|
+| `agents` | `$HOME/.agents/skills` | Cursor ほか、共通の置き場所を読むエージェント |
+| `claude` | `$HOME/.claude/skills` | Claude Code (Cursor も互換で読む) |
+| `cursor` | `$HOME/.cursor/skills` | Cursor |
+| `codex` | `$HOME/.codex/skills` | Codex |
+| `gemini` | `$HOME/.gemini/skills` | Gemini CLI |
+| `copilot` | `$HOME/.copilot/skills` | GitHub Copilot |
+
+置き場所はエージェントの版で変わることがある。読み込まれないときは、各エージェントの資料で置き場所を確認する。
+
+スキルに対応していないエージェントでは、`AGENTS.md` などの指示 file に次の 1 行を加える。
+
+```markdown
+日本語の文書を書き終えたら、`<jp-lint の dir>/skills/jp-lint/SKILL.md` の手順で点検して書き換える。
+```
+
+script だけ使うときは次のとおり。
 
 ```bash
 bash skills/jp-lint/scripts/jp-quality-lint.sh --strict 対象の file
