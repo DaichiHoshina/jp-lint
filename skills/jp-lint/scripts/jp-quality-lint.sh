@@ -17,6 +17,8 @@ source "${SCRIPT_DIR}/../lib/jp-quality/structural-checks.sh"
 source "${SCRIPT_DIR}/../lib/ja-byte-class.sh"
 
 [[ -n "${JP_QUALITY_DICT:-}" ]] && _principles_file="${JP_QUALITY_DICT}"
+# 利用者の差分辞書を重ねる (公開 repo だけの処理。export-from-ai-tools.sh が取り込みのたびに差し込む)
+source "${SCRIPT_DIR}/../lib/jp-quality/user-overlay.sh"; _apply_user_overlay
 
 if [[ ! -f "$_principles_file" ]]; then
   printf 'error: 辞書が見つからない: %s\n' "$_principles_file" >&2

@@ -24,6 +24,15 @@ sed -e '/~\/\.claude\//d' -e '/\[PRINCIPLES\.md\](PRINCIPLES\.md)/d' \
 sed -i.bak 's#^_principles_file=.*#_principles_file="${BASH_SOURCE[0]%/*}/../../references/NG-DICTIONARY.md"#' \
     "$DEST/lib/jp-quality/term-extraction.sh"
 rm -f "$DEST/lib/jp-quality/term-extraction.sh.bak"
+# 利用者の差分辞書を重ねる処理は公開 repo だけの仕様なので、取り込んだ script へ差し込む
+# (user-overlay.sh は正本に無く、この repo で管理する)
+grep -q '_apply_user_overlay' "$DEST/scripts/jp-quality-lint.sh" || \
+  sed -i.bak '/^\[\[ -n "\${JP_QUALITY_DICT:-}" \]\]/a\
+# 利用者の差分辞書を重ねる (公開 repo だけの処理。export-from-ai-tools.sh が取り込みのたびに差し込む)\
+source "${SCRIPT_DIR}/../lib/jp-quality/user-overlay.sh"; _apply_user_overlay
+' "$DEST/scripts/jp-quality-lint.sh"
+rm -f "$DEST/scripts/jp-quality-lint.sh.bak"
+grep -q '_apply_user_overlay' "$DEST/scripts/jp-quality-lint.sh" || { echo "差分辞書の処理を差し込めませんでした" >&2; exit 2; }
 chmod +x "$DEST/scripts/jp-quality-lint.sh"
 
 # 写した結果が単独で動くことと、公開できる内容であることを確かめる
