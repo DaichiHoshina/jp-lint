@@ -33,7 +33,7 @@ _BLOCK_KEYS=(
   "曖昧な汎用動詞 (block)"
   "非公式専門用語 (block)"
 )
-_WARN_KEYS=("断定語 (warn-only)" "英語jargon (warn-only)")
+_WARN_KEYS=("断定語 (warn-only)" "英語の業界用語 (warn-only)")
 # --strict でのみ見る key。hook は口語 chat への誤爆を避けて自動 block しないが、
 # 規範自体は chat にも適用されるので、後追い検査では明示的に当てられるようにする
 _SKILL_ONLY_KEYS=("荒い比喩語 (skill-only)")

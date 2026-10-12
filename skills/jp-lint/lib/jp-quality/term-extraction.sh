@@ -169,7 +169,7 @@ _assert_required_keys() {
   _assert_required_keys_done=1
   # NG-DICTIONARY.md 不在時は別経路で既に silent pass → この検査はスキップ
   [[ -f "$_principles_file" ]] || return 0
-  local required_keys=("AI定型語" "カタカナ造語禁止" "断定語 (warn-only)" "英語jargon (warn-only)" "難読漢語 (block)" "非日常英語 (block)" "弱い表現 (block)" "冗長表現 (block)" "AI段取り定型 (block)" "ヘッジ濫用 (block)" "過剰丁寧 (block)" "曖昧な汎用動詞 (block)")
+  local required_keys=("AI定型語" "カタカナ造語禁止" "断定語 (warn-only)" "英語の業界用語 (warn-only)" "難読漢語 (block)" "非日常英語 (block)" "弱い表現 (block)" "冗長表現 (block)" "AI段取り定型 (block)" "ヘッジ濫用 (block)" "過剰丁寧 (block)" "曖昧な汎用動詞 (block)")
   local key
   for key in "${required_keys[@]}"; do
     local result

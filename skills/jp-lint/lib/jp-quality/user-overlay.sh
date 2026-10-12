@@ -5,7 +5,7 @@
 #   ## 追加
 #   **AI定型語**: 語A / 語B      … 指定した分類へ語を追加する (無い分類は新設)
 #   ## 除外
-#   **英語jargon (warn-only)**: fallback   … 指定した分類から語を除く
+#   **英語の業界用語 (warn-only)**: fallback   … 指定した分類から語を除く
 #   - canonical                            … 全分類から語を除く
 # 重ねた結果は一時 file に書き、_principles_file をそこへ向ける。
 
