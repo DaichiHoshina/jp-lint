@@ -9,6 +9,7 @@
 | `skills/jp-lint/SKILL.md` | 検査から書き換えまでの手順と、失敗したときの対処 |
 | `skills/jp-lint/scripts/jp-quality-lint.sh` | 辞書と構造の検査 (bash) |
 | `skills/jp-lint/references/NG-DICTIONARY.md` | NG 語辞書 |
+| `skills/jp-lint/references/guides/` | 文章の規範。共通原則と、Design Doc・PR 本文・issue・長文の書き方 |
 | `skills/jp-lint/lib/jp-quality/user-overlay.sh` | 利用者の差分辞書を重ねる処理 (この repo だけの仕様) |
 | `scripts/install.sh` | 各エージェントのスキルの置き場所へ symlink で配置する |
 

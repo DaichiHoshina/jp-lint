@@ -20,6 +20,22 @@ for f in thresholds portable-stat log-rotation strip-code ja-byte-class; do cp "
 sed -e '/~\/\.claude\//d' -e '/\[PRINCIPLES\.md\](PRINCIPLES\.md)/d' \
     "$SRC/guidelines/writing/NG-DICTIONARY.md" > "$DEST/references/NG-DICTIONARY.md"
 
+# 文章の規範 (共通原則と、開発チームの文書の種類ごとの書き方) を写す。
+# 同梱しない file への link は文字だけにし、個人 path を含む行は除く
+GUIDES=(PRINCIPLES.md design-doc-protocol.md pr-description.md gh-issue.md long-form-doc.md)
+mkdir -p "$DEST/references/guides"
+for g in "${GUIDES[@]}"; do
+  perl -ne '
+    BEGIN { %keep = map { $_ => 1 } qw(PRINCIPLES.md design-doc-protocol.md pr-description.md gh-issue.md long-form-doc.md NG-DICTIONARY.md) }
+    next if m{\x7e/(\.claude|ghq)/|/Users/};
+    s{\[([^\]]+)\]\(([^)#\s]+\.md)(#[^)]*)?\)}{ $keep{$2} ? "[$1]($2$3)" : $1 }ge;
+    print;
+  ' "$SRC/guidelines/writing/$g" > "$DEST/references/guides/$g"
+done
+# 辞書への link は、guides/ から見た相対 path に合わせる
+sed -i.bak 's#](NG-DICTIONARY\.md#](../NG-DICTIONARY.md#g' "$DEST"/references/guides/*.md
+rm -f "$DEST"/references/guides/*.bak
+
 # 辞書の場所を、スキル dir からの相対 path に差し替える
 sed -i.bak 's#^_principles_file=.*#_principles_file="${BASH_SOURCE[0]%/*}/../../references/NG-DICTIONARY.md"#' \
     "$DEST/lib/jp-quality/term-extraction.sh"
