@@ -30,7 +30,7 @@ bash 4 以上が必要 (連想配列を使う)。
 **AI定型語**: させていただきます / 〜な感じ
 
 ## 除外
-**英語の業界用語 (warn-only)**: fallback
+**英語での業界用語 (warn-only)**: fallback
 - canonical
 ```
 
