@@ -17,7 +17,7 @@ cp "$SRC/lib/jp-quality/structural-checks.sh" "$SRC/lib/jp-quality/term-extracti
 for f in thresholds portable-stat log-rotation strip-code ja-byte-class; do cp "$SRC/lib/$f.sh" "$DEST/lib/"; done
 
 # 辞書は個人 path を含む行と、同梱しない PRINCIPLES.md への link を除いて写す
-sed -e '/~\/\.claude\//d' -e '/\[PRINCIPLES\.md\](PRINCIPLES\.md)/d' \
+sed -e '/~\/\.claude\//d' -e '/~\/ai-tools\//d' -e '/\[PRINCIPLES\.md\](PRINCIPLES\.md)/d' \
     "$SRC/guidelines/writing/NG-DICTIONARY.md" > "$DEST/references/NG-DICTIONARY.md"
 
 # 文章の規範 (共通原則と、開発チームの文書の種類ごとの書き方) を写す。
@@ -27,7 +27,7 @@ mkdir -p "$DEST/references/guides"
 for g in "${GUIDES[@]}"; do
   perl -ne '
     BEGIN { %keep = map { $_ => 1 } qw(PRINCIPLES.md design-doc-protocol.md pr-description.md gh-issue.md long-form-doc.md NG-DICTIONARY.md) }
-    next if m{\x7e/(\.claude|ghq)/|/Users/};
+    next if m{\x7e/(\.claude|ghq|ai-tools)/|/Users/};
     s{\[([^\]]+)\]\(([^)#\s]+\.md)(#[^)]*)?\)}{ $keep{$2} ? "[$1]($2$3)" : $1 }ge;
     print;
   ' "$SRC/guidelines/writing/$g" > "$DEST/references/guides/$g"
