@@ -1,5 +1,7 @@
 # 文章執筆の共通原則
 
+<!-- writing-tree: parent=none role=root -->
+
 ヒト向けドキュメント共通原則。個別ルールは各 file (commit-message / [pr-description](pr-description.md) / external-post / [long-form-doc](long-form-doc.md) / slide-doc / [design-doc-protocol](design-doc-protocol.md)) 参照。
 
 この file は約 800 行あるため、用途に応じて読む section を限定する (全文 load は深い書き直し時のみ)。

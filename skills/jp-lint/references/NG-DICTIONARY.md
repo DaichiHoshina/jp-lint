@@ -1,5 +1,7 @@
 # NG 辞書
 
+<!-- writing-tree: parent=PRINCIPLES.md role=dictionary -->
+
 hook (`lib/jp-quality/term-extraction.sh:_extract_term_list`、`hooks/pre-tool-use.sh` が `lib/jp-quality-check.sh` 経由で source) が動的抽出する NG 語 list。key 名・記法を 1 文字も変えない。
 
 

@@ -22,11 +22,11 @@ sed -e '/~\/\.claude\//d' -e '/~\/ai-tools\//d' -e '/\[PRINCIPLES\.md\](PRINCIPL
 
 # 文章の規範 (共通原則と、開発チームの文書の種類ごとの書き方) を写す。
 # 同梱しない file への link は文字だけにし、個人 path を含む行は除く
-GUIDES=(PRINCIPLES.md design-doc-protocol.md pr-description.md gh-issue.md long-form-doc.md)
+GUIDES=(PRINCIPLES.md document-design.md design-doc-protocol.md pr-description.md gh-issue.md long-form-doc.md)
 mkdir -p "$DEST/references/guides"
 for g in "${GUIDES[@]}"; do
   perl -ne '
-    BEGIN { %keep = map { $_ => 1 } qw(PRINCIPLES.md design-doc-protocol.md pr-description.md gh-issue.md long-form-doc.md NG-DICTIONARY.md) }
+    BEGIN { %keep = map { $_ => 1 } qw(PRINCIPLES.md document-design.md design-doc-protocol.md pr-description.md gh-issue.md long-form-doc.md NG-DICTIONARY.md) }
     next if m{\x7e/(\.claude|ghq|ai-tools)/|/Users/};
     s{\[([^\]]+)\]\(([^)#\s]+\.md)(#[^)]*)?\)}{ $keep{$2} ? "[$1]($2$3)" : $1 }ge;
     print;

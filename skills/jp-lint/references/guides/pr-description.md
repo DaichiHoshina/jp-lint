@@ -1,5 +1,7 @@
 # PR本文 + レビュー応答
 
+<!-- writing-tree: parent=PRINCIPLES.md role=content -->
+
 > **Purpose**: PR body とレビューコメント応答の書き方規範 (構造・NG 項目・添字運用)。
 
 ## レビューコメント

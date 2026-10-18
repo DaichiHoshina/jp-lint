@@ -25,6 +25,8 @@ license: MIT
 | issue | `guides/gh-issue.md` |
 | 上のどれでもない長文 (見出しが複数あるか 1,000 字を超える) | `guides/long-form-doc.md` |
 
+人が読む文書 (Design Doc / 長文 / 手順書) を書き直すときは、表の file に加えて `guides/document-design.md` の章立て・書き直し・図の節も読む。
+
 規範に、この skill に同梱していない command や file の名前が含まれることがある。それらは無視する。
 
 ## 手順

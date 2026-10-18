@@ -1,5 +1,7 @@
 # DesignDoc作成プロトコル
 
+<!-- writing-tree: parent=long-form-doc.md role=content -->
+
 DD = DesignDoc。共通文章原則は [PRINCIPLES.md](PRINCIPLES.md) 参照。
 
 ## 前提: DDと詳細設計書は別物

@@ -1,5 +1,7 @@
 # GitHub issue body 書式
 
+<!-- writing-tree: parent=PRINCIPLES.md role=content -->
+
 共通文章原則は [PRINCIPLES.md](PRINCIPLES.md) 参照。
 
 ## 原則
