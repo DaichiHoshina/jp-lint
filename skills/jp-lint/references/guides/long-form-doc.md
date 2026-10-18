@@ -446,4 +446,4 @@ KPTは課題明示が必須、YWTは継続学習の記録に特化。週次や�
 - `guidelines/common/notion-writing.md` — Notion固有フォーマット (主語必須・見出し階層)
 - `references/writing-patterns.md` — 詳細パターン (書き直しPhase / textlint / フェーズ境界)
 
-衝突時優先順位: Notion固有 > 長文doc原則 > 共通PRINCIPLES。
+衝突時の扱い: Notion の規則は見た目と書き込みの手順にだけ適用し、文の規則は知識の木の優先順位 (子 file を優先し、PRINCIPLES.md の「最優先」と「文章生成の不変条件」はどの file よりも優先) に従う。
