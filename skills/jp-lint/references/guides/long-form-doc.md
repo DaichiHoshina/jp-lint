@@ -1,6 +1,7 @@
 # 長文ドキュメント執筆 (DesignDoc / PRD / RCA / Notionページ)
 
 <!-- writing-tree: parent=document-design.md role=content -->
+<!-- writing-tree-required: 文書種別の判定 (Diátaxis、draft 前) | 構造シート (draft 前の準備、ナタリー式) | 濃淡設計 (全節同厚の禁止) | 文書構造論 — PREP 以外の選択肢 -->
 
 共通原則は [PRINCIPLES.md](PRINCIPLES.md) 参照。
 

@@ -1,6 +1,7 @@
 # 文書作成の共通規則 (章立て・書き直し・図)
 
 <!-- writing-tree: parent=PRINCIPLES.md role=content -->
+<!-- writing-tree-required: 1. 手法・仕組みの紹介文書の章立て | 2. 既存の文書を書き直すときの規則 -->
 
 人が読む文書を作る・書き直すときに、媒体 (Notion のページ / HTML の Artifact / local-docs の HTML / md / 記事) によらず従う規則。媒体ごとの見た目と書き込みの手順は、媒体の skill (`notion-writing` / `local-docs` / `tech-article` など) が扱う。文と語の規則は `PRINCIPLES.md`、長文の種別ごとの規則は `long-form-doc.md` にある。
 
