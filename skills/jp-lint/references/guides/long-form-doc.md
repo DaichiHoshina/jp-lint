@@ -28,13 +28,13 @@
 
 長文 doc を AI と書く場合、推測で書いて hallucination を埋め込む事故が多い。下記 3 つを起動時に必ず守る。
 
-- **新 library / API method を直書きする前に、`context7` skill または WebFetch で最新 docs を確認**する。記憶を信用しない (CLAUDE.md `## Library API Live Doc Required` と整合)
+- **新 library / API method を直書きする前に、library の公式 docs で最新の内容 を確認**する。記憶を信用しない (CLAUDE.md `## Library API Live Doc Required` と整合)
 - **検証していない数値・log・metric を含めない**。「不明」「未測定」と記してレビュー時に補完する方が事故が少ない
 - **「分からない場合は答えない」を貫く**。空欄や `TBD` にしておく方が、もっともらしい誤情報より安全
 
 ### AI 臭の確認 (draft 完成後)
 
-通常は本文を通読し、論点の飛躍、意味の重複、翻訳調を文脈で確認する。文長・段落長・語彙の統計は取らない。user が文体指標の測定を明示した場合だけ `references/on-demand-rules/natural-japanese-lint.md` を診断用に使う。
+通常は本文を通読し、論点の飛躍、意味の重複、翻訳調を文脈で確認する。文長・段落長・語彙の統計は取らない。user が文体指標の測定を明示した場合だけ `guidelines/writing/natural-japanese-lint.md` を診断用に使う。
 
 ## 文書種別の判定 (Diátaxis、draft 前)
 
@@ -61,6 +61,19 @@ Diátaxis の how-to に当たる手順書は、作業中の読み手が途中�
 - 背景説明や設計理由 (explanation) を手順列に入れない。必要なら冒頭 1-2 文に留めるか、設計文書への link にする
 - 環境差・条件差の分岐は IF-THEN で明文化し、「適宜」「状況に応じて」を使わない (PRINCIPLES.md 「chatとdocumentで文体を分ける」 の document 基本ルール)
 
+### 実施中の運用
+
+手順書に沿って作業を進めるときと、終えた後の記録の分け方。
+
+- 書き込む操作 (migration / DML / INSERT / deploy / merge) の前に、影響する行数か対象と、元に戻す方法 (`ROLLBACK` / down migration / revert) を 1 行添える。実行者が打つ前に止まれる
+- トランザクションの途中で NG になったら、最初に `ROLLBACK;` を案内する。開いたままにすると lock がかかったままになる
+- 手順書には手順そのものを記載する。実施で分かった手順の誤りや変更点は、手順書に反映してよい
+- 実施のログと記録 (時刻、出力の要点、確認の結果、止まった点) は、手順書とは別の場所に資料として置く。手順書に同じ内容を重ねて記載しない。同じ内容が 2 か所に並ぶと、更新のたびにずれる
+- 実施記録では、実施した手順にチェックを添え、時刻と結果を添える。条件付きで実施しなかった手順にもチェックを添え、「不要: <理由>」を添える。チェックの無い項目が、本当に残っている作業だけになるようにする
+- 同じ残件が複数の節にあれば 1 か所にまとめる
+- 実施記録には、実施を終えて使わなくなった記述 (切り戻しの手順、実施しなかった分岐の詳しい手順と SQL) を記載しない
+- 実施した手順の並び、控えた値、OK の条件の結果は実施記録から削除しない。後から何をどの順で行ったかを確かめられるようにする
+
 ## 文書の章立て・書き直し・図
 
 媒体 (Notion / HTML の Artifact / local-docs / md / 記事) によらない文書作成の規則は [document-design.md](document-design.md) にある。手法・仕組みの紹介文書の章立て、既存の文書を書き直すときの規則、図を描く基準を扱う。
@@ -85,7 +98,7 @@ Diátaxis の how-to に当たる手順書は、作業中の読み手が途中�
 
 ## 品質検証タイミング
 
-各 command の self-check 発動タイミングと loop 上限は `references/writing-check-protocol.md` を canonical とする (`/sdd-design` Step 8.5 / `/sdd-prd` Phase 4.5 / `/post-comment` Step 2.5 / `/git-push` Step 2・5.5 / `/retrospective` `/diagnose` 長文出力前)。draft 前の構造ゲートはこの file「構造ゲート適用」と `PRINCIPLES.md`「文書全体の読みやすさ」を参照する。
+各 command の self-check 発動タイミングと loop 上限は `guidelines/writing/writing-check-protocol.md` を canonical とする。draft 前の構造ゲートはこの file「構造ゲート適用」と `PRINCIPLES.md`「文書全体の読みやすさ」を参照する。
 
 **Web 出力 (Notion / GitHub / Confluence) 時は追加チェック 4 項目**: 長文の分割 / 内容を示す heading / 1 段落 1 主張 / 必要な箇所の強調 — 詳細 `PRINCIPLES.md` `## Web 可読性`。
 
@@ -182,6 +195,30 @@ decision type では以下を満たしてから本文を執筆する (1 つで�
 - Diátaxis: decision 本文の主種別は explanation（なぜ採るか）。手順・網羅一覧を含めない
 
 decision の結論と理由は 1 つの section が所有する。リードや概要表は、その section を開かなくても判断の枠を把握できる範囲に留め、理由を言い換えて繰り返さない。
+
+## 判断材料を渡す doc の構成
+
+読み手が doc を読んで何かを決める場合 (report / decision など)、本文を次の順に並べる。依頼で順番が指定されていれば、その順番を優先する。
+
+1. リード文: 結論の数字を、平均と最大のように種類を書き分けて 1〜2 文で示す。リード文と最初の見出しで、違う数字を並べない
+2. 判断に使う表: 1 つのセルには 1 つの数値だけを置く。範囲や参考値の行は、表の直前に「直接は求められない」などの条件を通常の濃さで記載する
+3. 見積もりの注意: 結論の数字を変える前提を、表の直下に 2〜3 項目だけ置く
+4. 判断すること: 誰が何を決めるかを、表と注意の直後に置く
+5. 数字の前提: 期間、集計方法、確かめていないこと
+6. 付録: 中央値・日別・集計方法の定義・取り先・再現用のクエリ。付録の冒頭に「ここから先は確かめる・再現するための情報」と 1 文で記載し、読み終える位置を示す
+
+- 本文には、同じ項目を並べた表を 1 つだけ置く。中央値や日付のように列だけが違う詳細の表は、付録にまとめる
+- 表の列は、項目名と数値の列を中心にする。集計方法の説明のような長い文の列は、付録の定義の表に置く
+
+### 集計結果だけを渡す doc
+
+依頼が「表で見たい」「1 日ごとの件数を知りたい」のように集計結果そのもので、判断や見積もりを求めていないときは、上の 6 段の構成を使わない。
+
+- 本文は、結果の表と、表ごとの集計対象の表、条件を記載する薄い文 1 行だけにする。結論の文・注意の枠・付録は置かない。説明を全部削る必要はなく、表を読むのに必要な定義だけを記載する
+- 単位を必ず記載する。1 つのセルに 2 つの値を置く表 (「回数 / 人数」など) は、見出しに両方の単位を記載する
+- 列ごとに集計の定義が違うときは、列名の下に小さい文字で定義を表示する。全列の定義が同じなら添えない
+- 表を続けて置くときは、表と表の間に小見出しを置く。見出しの無い表が続くと、境目が分からない
+- 日付に曜日を添えるときは、日付ごとに `date` command で求め、その出力をそのまま使う。1 日だけ求めて残りの曜日を順に割り当てない
 
 ## SoT 階層の正本判定
 
@@ -374,7 +411,7 @@ THEN システムは該当アイテムを最後に表示する
 
 **Why**: 事実と解釈の混在は読み手に「記述内容は確定値か推論か」を判断させ、認知負荷が上がる。事実層の数値だけ抽出して別判断したい読者のために 3 層分離する。
 
-**blameless 原則 (postmortem / RCA / incident report)**: 主語を「個人」ではなく「system / process / 仕組み」にする。「A さんが手順を省略した」ではなく「checklist に該当 step がなく、目視確認に依存していた」と書く。再発防止 (提案層) も「個人の注意喚起」ではなく「自動化 / lint / hook / 手順書改訂」で書く。詳細: `local-docs` skill の postmortem 本文ルール。
+**blameless 原則 (postmortem / RCA / incident report)**: 主語を「個人」ではなく「system / process / 仕組み」にする。「A さんが手順を省略した」ではなく「checklist に該当 step がなく、目視確認に依存していた」と書く。再発防止 (提案層) も「個人の注意喚起」ではなく「自動化 / lint / hook / 手順書改訂」で書く。詳細: 個人 doc に postmortem を書くときの本文ルール。
 
 ### KPT (Keep / Problem / Try)
 
@@ -423,19 +460,19 @@ KPTは課題明示が必須、YWTは継続学習の記録に特化。週次や�
 
 ```prompt
 あなたは SRE です。以下の log から障害の起点 (timestamp + service 名) を 1 行で抽出してください。
-回答は JSON 形式 `{ "timestamp": "...", "service": "..." }` のみとし、説明文を付けないでください。
+回答は JSON 形式 `{ "timestamp": "...", "service": "..." }` のみとし、説明文を添えないでください。
 ```
 
 地の文に prompt を埋め込まない (`「〜してください」と頼んだ` のような間接話法は再現性が下がる)。doc を読んだ人が同じ prompt を再現できる粒度で書く。
 
-## コマンドとの接続
+## 文書の種類ごとの適用順
 
-| コマンド | 適用 |
+| 文書 | 適用 |
 |---------|------|
-| `/sdd-design` | Step 3.5 structure gate と構成案 → draft → Step 7.5 writing-check-protocol。書き出し前4問、draft完成後 [DDセルフチェック18](design-doc-protocol.md) |
-| `/sdd-prd` | Phase 1.9 structure gate → Phase 2 draft → Phase 4.5 writing-check-protocol。MoSCoWテンプレ使用 |
-| `/git-push --pr` | PR 本文は [pr-description.md](pr-description.md) canonical。writing-check-protocol (Step 2 / 5.5)。この doc の 4 問は draft 起点として併用 |
-| `/diagnose` 長文 / `/retrospective` | 出力前に structure gate を含む writing-check-protocol。箇条書きだけで終わらせない |
+| Design Doc | draft 前に structure gate と構成案 → draft → writing-check-protocol。書き出し前4問、draft完成後 [DDセルフチェック18](design-doc-protocol.md) |
+| PRD | draft 前に structure gate → draft → writing-check-protocol。MoSCoWテンプレ使用 |
+| PR 本文 | [pr-description.md](pr-description.md) canonical。commit message と PR 本文の両方で writing-check-protocol。この doc の 4 問は draft 起点として併用 |
+| 調査の長文報告 / 振り返り | 出力前に structure gate を含む writing-check-protocol。箇条書きだけで終わらせない |
 
 ## 関連
 
@@ -443,7 +480,7 @@ KPTは課題明示が必須、YWTは継続学習の記録に特化。週次や�
 - [design-doc-protocol.md](design-doc-protocol.md) — DD 4 Step + 10パターン + アンチパターン + セルフチェック18
 - external-post.md — 短文向け (PRコメント / Slack / Issue + 5軸採点)
 - strategy.md — ドキュメント種別・保存先 / 体系原則
-- `guidelines/common/notion-writing.md` — Notion固有フォーマット (主語必須・見出し階層)
-- `references/writing-patterns.md` — 詳細パターン (書き直しPhase / textlint / フェーズ境界)
+- `guidelines/notion/notion-writing.md` — Notion固有フォーマット (主語必須・見出し階層)
+- `guidelines/writing/writing-patterns.md` — 詳細パターン (書き直しPhase / textlint / フェーズ境界)
 
 衝突時の扱い: Notion の規則は見た目と書き込みの手順にだけ適用し、文の規則は知識の木の優先順位 (子 file を優先し、PRINCIPLES.md の「最優先」と「文章生成の不変条件」はどの file よりも優先) に従う。

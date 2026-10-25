@@ -55,7 +55,7 @@ _check_forced_shortening() {
   hits=$(printf '%s' "$stripped" | LC_ALL=C grep -oE "(${_JA_KANJI}|${_JA_KATA})+済" | sort -u | tr '\n' ' ' || true)
   [[ -n "${hits// /}" ]] && out="${out}済で切る省略形: ${hits}; "
   # 「要確認」「要対応」のように 要+漢語 で状態を表す形
-  # 文書形式として固定した label (【要確認】 / 前提要確認 / [[warn:要対応]]) は省略形として数えない
+  # 文書形式として固定した label (【要確認】 / 前提要確認 / [[warn:要対応]]) は省略形として集計しない
   hits=$(printf '%s' "$text" | sed -E 's/【要確認[^】]*】//g; s/前提要確認//g; s/\[\[warn:要対応\]\]//g' | grep -oE '要(確認|対応|修正|議論|再考|検討)' | sort -u | tr '\n' ' ' || true)
   [[ -n "${hits// /}" ]] && out="${out}要+漢語の省略形: ${hits}; "
   # 連用形否定 (未渡し / 未指定時)

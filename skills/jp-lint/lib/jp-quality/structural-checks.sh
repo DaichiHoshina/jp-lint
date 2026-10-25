@@ -21,7 +21,7 @@ _check_structural_quality() {
   local clean
   clean=$(_strip_code_blocks "$text")
   local out=""
-  # 読点 4 個以上の文 (。で改行分割してから行=文として数える。byte-safe)
+  # 読点 4 個以上の文 (。で改行分割してから行=文として集計する。byte-safe)
   # macOS awk はマルチバイト RS 非対応のため sed で改行化してから処理する
   # 。を改行へ置換 (BSD/GNU sed 両対応の $'\n' 形式)。SC1003 は誤検出のため抑止
   local tc
@@ -71,7 +71,7 @@ sents = [s.strip() for s in re.split(r"[。\n]", text) if s.strip()]
 
 polite = 0
 if os.environ.get("POLITE_CHECK") == "3":
-    # 人に宛てる draft は敬体で書く (2026-10-02)。見出し・表・引用・ラベルだけの行は数えない
+    # 人に宛てる draft は敬体で書く (2026-10-02)。見出し・表・引用・ラベルだけの行は集計しない
     pol_end = re.compile(r"(です|ます|ました|ません|でした|でしょう|ください|ましょう)$")
     plain_end = re.compile(r"(る|た|ない|だ|である|う)$")
     for ln in lines:
@@ -85,7 +85,7 @@ if os.environ.get("POLITE_CHECK") == "3":
             if t and plain_end.search(t) and not pol_end.search(t):
                 polite += 1
 elif os.environ.get("POLITE_CHECK") == "2":
-    # chat は敬体規範 (2026-08-28)。逆向きに「〜だ」「〜である」終止を数える
+    # chat は敬体規範 (2026-08-28)。逆向きに「〜だ」「〜である」終止を集計する
     plain = re.compile(r"(だ|である)$")
     polite = sum(1 for s in sents if plain.search(s))
 
@@ -155,7 +155,7 @@ for m in re.finditer(r"[（(]([^（）()]{1,120})[）)]", text):
 stuff_cnt = len(stuff_hits)
 stuff_sample = " / ".join(stuff_hits[:2]) or "-"
 
-# 文末の断定「〜だ」を数える。PRINCIPLES.md 「plain JP の文体」 が chat の敬体と
+# 文末の断定「〜だ」を集計する。PRINCIPLES.md 「plain JP の文体」 が chat の敬体と
 # 外向き text の常体の両方でこの終止を禁じる。撥音便の過去形 (読んだ / 含んだ) と
 # 「〜んだ」の口語は対象から外し、名詞述語と形容動詞の終止だけを拾う
 da_re = re.compile(r"(?<!ん)だ$")
@@ -268,13 +268,13 @@ _format_sentence_structure_warn() {
   (( _SS_TIME > 0 )) && out="${out}時限マーカー: ${_SS_TIME}件 (${_SS_TIME_SAMPLE}) → 時制中立表現に (pr-description.md ### 時限マーカー禁止); "
   (( _SS_STUFF > 0 )) && out="${out}括弧詰め込み: ${_SS_STUFF}件 (${_SS_STUFF_SAMPLE}) → 括弧の名詞羅列を本文の文に開く (PRINCIPLES.md ### 圧縮文を開く); "
   (( _SS_PLAIN_DA > 0 )) && out="${out}文末の断定「〜だ」: ${_SS_PLAIN_DA}件 (${_SS_PLAIN_DA_SAMPLE}) → 動詞終止 (〜する / 〜した / 〜ある) に開く; "
-  (( _SS_ENDING > 0 )) && out="${out}同一文末3連続: ${_SS_ENDING}箇所 (${_SS_ENDING_SAMPLE}) → 文をまとめるか 2 文目以降を下位 bullet に下げる (PRINCIPLES.md ### (3) 文体より意味を優先する); "
+  (( _SS_ENDING > 0 )) && out="${out}同一文末3連続: ${_SS_ENDING}箇所 (${_SS_ENDING_SAMPLE}) → 関連する 2 文を 1 文にまとめるか (例: 「A します。B します。」を「A して、B します。」に)、並列の項目は表にする。下位 bullet に下げても連続は切れない (PRINCIPLES.md ### (3) 文体より意味を優先する); "
   (( _SS_BOLD > 0 )) && out="${out}太字頻度: ${_SS_BOLD_RATE} で 1000 字あたり 3.0 超 → 強調は結論と数値の 1〜2 か所に限定する; "
   [[ -n "$out" ]] && printf '%s' "${out%; }"
   return 0
 }
 
-# 文構造の script 検出 (矢印チェーン / 文末の文体 ほか)。warn-only。100字超文は数えるだけで出力しない (2026-08-28 廃止)。
+# 文構造の script 検出 (矢印チェーン / 文末の文体 ほか)。warn-only。100字超文は集計するだけで出力しない (2026-08-28 廃止)。
 # _check_sentence_structure_counts の wrapper。引数は counts 版と同一。
 # 出力: warn 文字列 (検出ゼロなら空)。外向き経路 (_block_if_ai_jargon) はこちらを使う
 _check_sentence_structure() {
