@@ -15,14 +15,9 @@ readonly _TH_PARALLEL_SEQ_TTL_NS=600000000000 # 10 min。前回 fire からこ�
 readonly _TH_BUNDLE_HARD_BLOCK_SEQ=3      # bundle 違反 hard block: warn 後の更なる sequential fire (bundle-violation guard)
 readonly _TH_DELEGATE_SEQ=3               # 委譲 warn: large-repo 連続 edit
 readonly _TH_PARALLEL_WINDOW_NS=30000000000 # 30 sec 並列判定 window (nanosec)。Claude Code は 1 message N tool_use を起動するとき subagent spawn の overhead で各 Agent 起動が 5-25 秒間隔になる実測あり (2026-06-25 bundle-violation-block.log elapsed_ms=23647)。500ms では並列を逐次扱いにして誤って block する。人間は 30 sec 以内に同じ command を連発しないため別 message 逐次の誤判定リスクは低い。
-readonly _TH_SESSION_AGE_S=10800          # 3h (sec) warn
-readonly _TH_SESSION_AGE_URGENT_S=21600   # 6h (sec) urgent
-readonly _TH_SESSION_MSG=150              # 150 msg (~75 opus turn)。実測 (2026-06-19): 278 msg で $41/session、149 msg で $46/session。中規模 session が cost driver
-readonly _TH_SESSION_MSG_URGENT=350       # 350 msg (~175 opus turn)。実測: 300+ msg = $45+/session の帯
-readonly _TH_SESSION_MSG_FORCE=400        # 400 msg で pre-tool-use が /memory-save + /clear を強指示 (2026-07-10 実測: 400+ msg session が cache_read の大半を使用している)
-readonly _TH_TOKEN=3000000                # 3M token warn (cache_read 込み累積)。閾値引下げで sweet spot を逃さない
-readonly _TH_TOKEN_URGENT=50000000        # 50M token urgent (top session は 2B 行く実測あり)
-readonly _TH_IDLE_S=1800                  # 30 分 idle で /clear 提案 (cache 全持越し回避)
+readonly _TH_CONTEXT=200000              # 1 応答の読み込み 200K token で warn。公式 docs: 1 時間 cache で約 200K を超えた idle の会話は自動 compact される (2026-10-27 実測: 200-299 msg の中央値 193K)
+readonly _TH_CONTEXT_URGENT=400000       # 400K token で urgent。1 応答の費用が 100K の会話の 4 倍 (2026-10-27 実測: 400 msg 以上の会話が直近 14 日の cache_read の 8 割)
+readonly _TH_IDLE_S=3600                  # 60 分 idle で /clear 提案。prompt cache の TTL が 1 時間で、それより短い idle では cache を再利用できる
 readonly _TH_TASK_COMPLETED_SEQ=2         # task 完了 warn
 readonly _TH_STOP_MEMORY_FILES=3          # stop.sh memory-save 候補 file 数
 readonly _TH_STOP_PUSH_MIN_TOOLS=3        # stop.sh 完了通知 guard: turn 内の tool 呼び出しがこの回数以上なら作業 turn とみなす
