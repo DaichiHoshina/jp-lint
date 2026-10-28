@@ -131,7 +131,7 @@ if cur_group:
 
 # 時限マーカー warn: merge / 投稿後の読み手が解決できない時制参照を検出する。誤爆抑制のため保守的 pattern に限定する。
 # 対象 pattern は下 time_patterns の 5 種のみ (PR 番号 + 以降 / 「本 PR で新設」等 / 相対日付 + 合意) に限定する。
-# code fence 内 pattern (`Depends on #123`) は _strip_code_blocks 済のため素の text だけ match する
+# code fence 内 pattern (`Depends on #123`) は _strip_code_blocks 済のため code fence 外の text だけ match する
 time_patterns = [
     r"#\d+\s*以降",
     r"本\s*PR\s*で\s*(新設|追加|導入|削除)",
